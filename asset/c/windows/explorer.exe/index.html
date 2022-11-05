@@ -1,0 +1,681 @@
+<div id="root">
+  <div id="nav"></div>
+  <div id="body">
+    <div id="nav2"></div>
+    <div id="content" class="disk"></div>
+  </div>
+  <div id="footer">
+    <p id="item-num"></p>
+    <img id="item-detail-display" src="%app%/asset/detail.png" style="margin-left: auto;">
+    <img id="item-big-display" src="%app%/asset/pic.png">
+  </div>
+</div>
+<style scoped>
+  body.dark #root {
+    --bg1: #191919;
+    --bg2: #202020;
+    --bg3: #555;
+    --bg4: #333;
+    --bg5: #777;
+    --bg6: #4d4d4d;
+  }
+
+  #root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    user-select: none;
+  }
+
+  /* 上导航 */
+  #nav {
+    display: flex;
+    height: 40px;
+    background-color: var(--bg1);
+  }
+  #nav > svg {
+    fill: var(--fgc);
+    padding: 5px;
+    margin: 5px;
+    width: 20px;
+    height: 20px;
+    transition: background-color 0.2s, fill 0.2s;
+  }
+  #nav > svg:hover {
+    fill: var(--theme);
+  }
+  #nav > svg.disabled {
+    fill: var(--bg3);
+  }
+  #nav > svg.up:hover {
+    background-color: var(--bg3);
+    fill: var(--fgc);
+  }
+
+  #nav > div {
+    margin: 5px;
+    height: 30px;
+    box-sizing: border-box;
+    border: 1px solid var(--bg3);
+  }
+
+  #path-container {
+    flex-grow: 1;
+    color: var(--fgc);
+    position: relative;
+    overflow: hidden;
+  }
+  #path-container > input {
+    width: calc(100% - 20px);
+    height: 30px;
+    padding: 0 10px;
+    border: none;
+    outline: none;
+    display: none;
+    background: none;
+    color: var(--fgc);
+  }
+  #path-container > img {
+    position: absolute;
+    padding: 5px 0 5px 2px;
+    width: 20px;
+    height: 20px;
+  }
+  #path-container > div {
+    position: absolute;
+    display: flex;
+    padding-left: 30px;
+  }
+  #path-container > div > span {
+    margin: 1px;
+    padding: 0 20px 0 2px;
+    height: 26px;
+    line-height: 26px;
+    font-size: 15px;
+    color: var(--fgc);
+    transition: background-color 0.2s;
+  }
+  #path-container > div > span:hover {
+    background-color: var(--bg6);
+  }
+  #path-container > div > span:active {
+    background-color: var(--bg5);
+  }
+  #path-container.foc > img {
+    display: none;
+  }
+  #path-container.foc > input {
+    display: block;
+  }
+  #path-container.foc > div {
+    display: none;
+  }
+
+  #search-container {
+    width: 200px;
+    cursor: text;
+    display: flex;
+  }
+  #search-container > svg {
+    fill: var(--bg3);
+    padding: 5px 10px;
+    width: 20px;
+    height: 20px;
+  }
+  #search-container > input {
+    color: var(--fgc);
+    padding: 5px 0;
+    height: 20px;
+    width: 160px;
+    border: none;
+    outline: none;
+    background: none;
+  }
+
+  /* 导航下面的主体 */
+  #body {
+    flex-grow: 1;
+    display: flex;
+    height: calc(100% - 60px);
+  }
+  /* 左导航 */
+  #nav2 {
+    width: 120px;
+    background-color: var(--bg1);
+  }
+
+  
+  /* 主内容 */
+  #content {
+    display: flex;
+    background-color: var(--bg2);
+    flex-grow: 1;
+    overflow: auto;
+    width: 1px;
+  }
+
+  /* 硬盘显示状态 */
+  #content.disk > div {
+    height: 60px;
+    width: 260px;
+    display: flex;
+    margin: 5px;
+  }
+  #content.disk > div:hover {
+    background-color: var(--bg6);
+  }
+  #content.disk > div:active {
+    background-color: var(--bg5);
+  }
+  #content.disk > div > img {
+    padding: 5px;
+    width: 50px;
+    height: 50px;
+  }
+  #content.disk > div > div {
+    display: flex;
+    flex-direction: column;
+  }
+  #content.disk > div > div > p {
+    margin: 0;
+    height: 20px;
+    line-height: 20px;
+    font-size: 12px;
+    color: var(--fgc);
+  }
+  #content.disk > div > div > p:last-child {
+    opacity: 0.7;
+  }
+  #content.disk > div > div > div {
+    margin: 2px 0;
+    height: 14px;
+    width: 180px;
+    border: 1px solid #e6e6e6;
+    background-color: #e6e6e6;
+    box-sizing: content-box;
+    position: relative;
+  }
+  #content.disk > div > div > div > div {
+    position: absolute;
+    height: 14px;
+    background-color: #26A0DA;
+  }
+
+  /* 文件详细显示状态 */
+  #content.detail {
+    display: block;
+  }
+  #content.detail > table {
+    border-collapse: collapse;
+    table-layout: fixed;
+    color: var(--fgc);
+    width: 1px;
+  }
+  #content.detail > table th {
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    border-right: 1px solid var(--bg3);
+    padding-left: 10px;
+    height: 30px;
+    line-height: 30px;
+  }
+  #content.detail > table td {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding-left: 5px;
+  }
+  #content.detail > table td > div {
+    padding-left: 10px;
+    display: flex;
+  }
+  #content.detail > table td > div > img{
+    padding: 2px 5px;
+    width: 16px;
+    height: 16px;
+  }
+  #content.detail > table > tbody > tr {
+    font-size: 12px;
+    height: 20px;
+    line-height: 20px;
+  }
+  #content.detail > table > tbody > tr:hover, #content.detail > table th:hover {
+    background-color: var(--bg6);
+  }
+  #content.detail > table > tbody > tr:active, #content.detail > table th:active {
+    background-color: var(--bg5);
+  }
+  #content.detail > table td, #content.detail > table th {
+    opacity: 0.7;
+  }
+  /* 文件大图标显示 */
+  #content.big {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  #content.big > div {
+    margin: 10px;
+    width: 100px;
+    height: 150px;
+    display: flex;
+    flex-direction: column;
+  }
+  #content.big > div:hover {
+    background-color: var(--bg6);
+  }
+  #content.big > div:active {
+    background-color: var(--bg5);
+  }
+  #content.big > div > img {
+    margin: 10px;
+    width: 80px;
+    height: 80px;
+    box-shadow: 1px 1px 1px #000;
+  }
+  #content.big > div > p {
+    margin: 0;
+    text-align: center;
+    color: var(--fgc);
+    font-size: 15px;
+    word-break: break-all;
+  }
+
+  #footer {
+    height: 20px;
+    background-color: var(--bg4);
+    display: flex;
+    
+  }
+  #footer > p {
+    line-height: 20px;
+    margin: 0 20px;
+    color: var(--fgc);
+    font-size: 12px;
+    opacity: 0.7;
+  }
+  #footer > img {
+    padding: 4px;
+    width: 12px;
+    height: 12px;
+  }
+  #footer > img:hover {
+    background-color: var(--bg6);
+  }
+  #footer > img:active {
+    background-color: var(--bg5);
+  }
+</style>
+<script>
+
+  // 左三按钮
+  var leftArrow = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  $("nav").append(leftArrow);
+  leftArrow.setAttribute("class", "disabled");
+  leftArrow.innerHTML = '<path d="M885.113 489.373L628.338 232.599c-12.496-12.497-32.758-12.497-45.254 0-12.497 12.497-12.497 32.758 0 45.255l203.3 203.3H158.025c-17.036 0-30.846 13.811-30.846 30.846 0 17.036 13.811 30.846 30.846 30.846h628.36L583.084 746.147c-12.497 12.496-12.497 32.758 0 45.255 6.248 6.248 14.438 9.372 22.627 9.372s16.379-3.124 22.627-9.372l256.775-256.775a31.999 31.999 0 0 0 0-45.254z"></path>';
+  leftArrow.setAttribute("viewBox", "0 0 1024 1024");
+  leftArrow.style.transform = "rotate(180deg)";
+
+  var rightArrow = leftArrow.cloneNode(true);
+  $("nav").append(rightArrow);
+  rightArrow.setAttribute("class", "disabled");
+  rightArrow.style.transform = "rotate(0deg)";
+
+  var upArrow = leftArrow.cloneNode(true);
+  $("nav").append(upArrow);
+  upArrow.setAttribute("class", "up");
+  upArrow.style.transform = "rotate(270deg)";
+  upArrow.onclick = ()=> {
+
+    var pa = pathInput.value.split("/");
+    pa.splice(pa.length-2, 2);
+    var np = pa.join("/")+"/";
+    np = np==="/"?"":np
+    ehistory.add(np);
+    renderContent(np);
+
+  }
+  
+
+  // 路径框
+  var pathCont = document.createElement("div");
+  $("nav").append(pathCont);
+  pathCont.id = "path-container";
+
+  var pathInput = document.createElement("input");
+  pathCont.append(pathInput);
+  pathInput.onkeydown = (e)=> {
+
+    var er = pathInput.value;
+    if(e.keyCode===13) renderContent(er.endsWith("/")?er:(er+"/"));
+
+  };
+
+  var pathFlex = document.createElement("div");
+  pathCont.append(pathFlex);
+  pathFlex.onclick = (e)=> e.stopPropagation();
+
+  var pathIcon = document.createElement("img");
+  pathCont.append(pathIcon);
+  pathIcon.src = "%app%/asset/computer_small.png";
+
+  pathCont.onclick = (e)=> {
+
+    e.stopPropagation();
+    pathCont.classList.add("foc");
+    pathInput.focus();
+    app.onclick = ()=> {
+
+      pathCont.classList.remove("foc");
+      app.onclick = null;
+
+    };
+    
+  };
+
+
+  // 搜索框
+  var searchCont = document.createElement("div");
+  $("nav").append(searchCont);
+  searchCont.id = "search-container";
+
+  var searchSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  searchCont.append(searchSvg);
+  searchSvg.innerHTML = '<path d="M640 768a382.24 382.24 0 0 1-247.808-90.912L45.248 1024 0 978.752l346.912-346.944A383.84 383.84 0 1 1 640 768z m0-704a320 320 0 1 0 320 320A320 320 0 0 0 640 64z"></path>';
+  searchSvg.setAttribute("viewBox", "0 0 1024 1024");
+
+  var searchInp = document.createElement("input");
+  searchCont.append(searchInp);
+
+  searchCont.onclick = ()=> searchInp.focus();
+
+  var useBig = false;// 是否使用大视图
+  // renderContent(p: String): void 渲染路径文件夹的内容
+  function renderContent(p) {
+
+    app.name = p;
+
+    pathInput.value = p;
+    pathFlex.innerHTML = '';
+    var pa = p.split("/");
+    for(let i = -1; i < pa.length-1; ++i) {
+
+      const sp = document.createElement("span");
+      pathFlex.append(sp);
+      sp.textContent = i===-1?"此电脑":pa[i];
+
+      const ap = i===-1?"":(pa.slice(0, i+1).join("/")+"/");
+      sp.onclick = ()=> {
+
+        ehistory.add(ap);
+        renderContent(ap);
+
+      };
+
+    }
+    app.scopeStyle();
+
+    var c = $("content");
+    if(p==="") {
+
+      c.textContent = "";
+      c.className = "disk";
+
+      const d = document.createElement("div");
+      c.append(d);
+      d.innerHTML = `<img src="%app%/asset/disk_sys.png">
+      <div>
+        <p>本地磁盘 (C:)</p>
+        <div><div style="width: 60%;"></div></div>
+        <p>201.7 GB 可用，共 489 GB</p>
+      </div>`;
+      d.ondblclick = ()=> {
+
+        ehistory.add("c:/");
+        renderContent("c:/", true);
+
+      }
+
+      app.scopeStyle();
+      return true;
+
+    }
+
+    req(resPath(p, true), (r)=> {
+
+      if(!r||!r.length) return Win.createRaw("无法访问"+p);
+
+      $("item-num").textContent = r.length + " 个橡木";
+
+      function detailDisplay() {
+
+        useBig = false;
+
+        c.className = "detail";
+        c.innerHTML = `<table>
+          <colgroup>
+            <col style="width: 200px">
+            <col style="width: 150px">
+            <col style="width: 120px">
+            <col style="width: 90px">
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col" style="padding-left: 20px">名称</th>
+              <th scope="col">修改日期</th>
+              <th scope="col">类型</th>
+              <th scope="col">大小</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>`;
+
+        var tb = c.querySelector("tbody");
+        var fileDF = document.createDocumentFragment();
+        for(let i = 0; i < r.length; ++i) {
+
+          const fn = r[i].name;
+          const typeArr = fn.split(".");
+          const ft = typeArr[typeArr.length-1];
+          const isDir = r[i].type==="dir";
+          
+          const d = document.createElement("tr");
+          (isDir?tb:fileDF).append(d);
+
+          const fname = document.createElement("td");
+          d.append(fname);
+
+          const fnameDiv = document.createElement("div");
+          fname.append(fnameDiv);
+          
+          const ficon = document.createElement("img");
+          fnameDiv.append(ficon);
+          ficon.onerror = ()=> ficon.src = "%app%/asset/file.png";
+          // 判定文件图标
+          if(ft==="exe") {
+
+            req(resPath(p+fn+"/manifest.json"), (r)=> {
+
+              if(!r||!r.icon) return ficon.src = "%app%/asset/cmd_small.png";
+              ficon.src = resPath(p+fn+"/"+r.icon);
+              
+            }, "json");
+            
+          }
+          else if(isDir) ficon.src = "%app%/asset/dir_small.png";
+          else if(fn===".path.json") ficon.src = "%app%/asset/inffile_small.png";
+          else if(ft==="html") ficon.src = "%app%/asset/bat_small.png";
+          else if(ft==="ico") ficon.src = "%app%/asset/picfile.png";
+          else if(ft==="png"||ft==="jpg"||ft==="webp"||ft==="gif") ficon.src = "%app%/asset/pic.png";
+          else if(ft==="txt") ficon.src = "%app%/asset/txt.png";
+          else ficon.src = "%app%/asset/file.png";
+
+          fnameDiv.append(r[i].name);
+          fname.style.opacity = "1";
+
+          const fmtime = document.createElement("td");
+          d.append(fmtime);
+          fmtime.textContent = r[i].mtime?(new Date(r[i].mtime)).toLocaleString():"";
+
+          const ftype = document.createElement("td");
+          d.append(ftype);
+          if(isDir) {
+
+            if(ft==="exe") ftype.textContent = "可执行程序";
+            else ftype.textContent = "文件夹";
+
+          }
+          else if(typeArr.length>0) ftype.textContent = ft+"文件";
+          else ftype.textContent = "文件";
+
+          const fsize = document.createElement("td");
+          d.append(fsize);
+          fsize.textContent = r[i].size;
+
+          if(isDir) {
+
+            d.ondblclick = ()=> {
+              
+              var np = p+fn+"/";
+              ehistory.add(np);
+              renderContent(np);
+              
+            }
+
+          }
+
+        }
+        tb.append(fileDF);
+
+        app.scopeStyle();
+
+      }
+      $("item-detail-display").onclick = detailDisplay;
+
+      function bigDisplay() {
+
+        useBig = true;
+
+        c.className = "big";
+        c.textContent = "";
+
+        var fileDF = document.createDocumentFragment();
+        for(let i = 0; i < r.length; ++i) {
+          
+          const fn = r[i].name;
+          const typeArr = fn.split(".");
+          const ft = typeArr[typeArr.length-1];
+          const isDir = r[i].type==="dir";
+
+          const d = document.createElement("div");
+          (isDir?c:fileDF).append(d);
+
+          const ficon = document.createElement("img");
+          d.append(ficon);
+          ficon.onerror = ()=> ficon.src = "%app%/asset/file.png";
+          if(ft==="exe") {
+
+            req(resPath(p+fn+"/manifest.json"), (r)=> {
+
+              if(!r||!r.icon) return ficon.src = "%app%/asset/cmd.png";
+              ficon.src = resPath(p+fn+"/"+r.icon);
+              
+            }, "json");
+
+          }
+          else if(isDir) ficon.src = "%app%/asset/dir.png";
+          else if(ft==="ico"||ft==="png"||ft==="webp"||ft==="jpg") ficon.src = resPath(p+fn);
+          else ficon.src = "%app%/asset/file.png";
+
+          var fname = document.createElement("p");
+          d.append(fname);
+          fname.textContent = fn;
+
+          if(isDir) {
+
+            d.ondblclick = ()=> {
+              
+              var np = p+r[i].name+"/";
+              ehistory.add(np);
+              renderContent(np);
+              
+            }
+
+          }
+
+        }
+        c.append(fileDF);
+
+        app.scopeStyle();
+
+      }
+      $("item-big-display").onclick = bigDisplay;
+
+      useBig?bigDisplay():detailDisplay();
+
+      pathFlex.style.right = (pathFlex.clientWidth > $("path-container").clientWidth)?"0":"";
+    }, "json");
+
+  }
+  
+  var ehistory = {
+    list: [],
+    index: 0,
+    add(p) {
+
+      ehistory.list.splice(ehistory.index+1);
+      rightArrow.setAttribute("class", "disabled");
+      rightArrow.onclick = null;
+
+      ehistory.list.push(p);
+      ++ehistory.index;
+      leftArrow.setAttribute("class", "");
+      leftArrow.onclick = ehistory.prev;
+
+    },
+    next() {
+
+      renderContent(ehistory.list[++ehistory.index]);
+
+      leftArrow.setAttribute("class", "");
+      leftArrow.onclick = ehistory.prev;
+      if(ehistory.index>=ehistory.list.length - 1) {
+        
+        ehistory.index = ehistory.list.length - 1;
+        rightArrow.setAttribute("class", "disabled");
+        rightArrow.onclick = null;
+          
+      }
+
+    },
+    prev() {
+
+      renderContent(ehistory.list[--ehistory.index]);
+      
+      rightArrow.setAttribute("class", "");
+      rightArrow.onclick = ehistory.next;
+      if(ehistory.index<=0) {
+        
+        ehistory.index = 0;
+        leftArrow.setAttribute("class", "disabled");
+        leftArrow.onclick = null;
+          
+      }
+
+    }
+  };
+  
+  ehistory.list = ["c:/"];
+  renderContent("c:/", true);
+
+  app.c3.onclick = ()=> {
+
+    Win.createRaw("会想你的");
+    app.shutdown();
+
+  }
+
+  app.style.minHeight = "300px";
+  app.style.minWidth = "500px";
+  
+</script>

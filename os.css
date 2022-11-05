@@ -1,0 +1,417 @@
+
+/* 
+  此文件为系统全局样式，与app文件共用id和class池
+  此文件中所有id和class为全局样式，如无需求请勿在app样式中覆盖占用
+  app样式优先级更高，所以可以通过启动app来修改系统样式
+  app与app之间id与class池可能冲突，因此app中可以使用<style scoped></style>。
+ */
+
+body {
+  margin: 0;
+  font-family: "微软雅黑", "Microsoft YaHei", sans-serif;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* 
+  ===以下为app中也可共享的默认全局变量===
+  可以像`body.dark #os-desktop`来设置一个div的深色和浅色主题的变量。bgc指BackGroundColor。
+  知识点: https://developer.mozilla.org/zh-CN/docs/Web/CSS/Using_CSS_custom_properties
+ */
+
+body {
+  --theme: #0078D7;
+  /* 's-'代表setting前缀 */
+  --s-taskbar-height: 50px;
+  --s-taskbar-position: calc( 100% - var(--s-taskbar-height) );
+}
+body.dark {
+  --bgc: #000;
+  --fgc: #fff;
+}
+body.light {
+  --bgc: #fff;
+  --fgc: #000;
+}
+
+
+/* 
+  ===以下为app中也可共享的全局样式===
+  知识点: https://developer.mozilla.org/zh-CN/docs/Web/CSS/Class_selectors
+ */
+
+/* 万金油背景图样式 */
+.background{
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* draggable函数所使用的样式 */
+.draggable > div {
+  position: absolute;
+}
+.draggable > .t {
+  top: 0px;
+}
+.draggable > .b {
+  bottom: 0px;
+}
+.draggable > .t, .draggable > .b{
+  left: 5px;
+  cursor: n-resize;
+  width: calc(100% - 10px);
+  height: 5px;
+}
+.draggable > .l {
+  left: 0px;
+}
+.draggable > .r {
+  right: 0;
+}
+.draggable > .l, .draggable > .r {
+  top: 5px;
+  cursor: e-resize;
+  height: calc(100% - 10px);
+  width: 5px;
+}
+.draggable > .tl {
+  left: 0;
+  top: 0;
+  cursor: nw-resize;
+}
+.draggable > .tr {
+  right: 0;
+  top: 0;
+  cursor: ne-resize;
+}
+.draggable > .br {
+  right: 0;
+  bottom: 0;
+  cursor: se-resize;
+}
+.draggable > .bl {
+  left: 0;
+  bottom: 0;
+  cursor: ne-resize;
+}
+.draggable > .tl, .draggable > .tr, .draggable > .br, .draggable > .bl {
+  width: 5px;
+  height: 5px;
+}
+
+
+/* 
+  ===以下为系统专用样式===
+ */
+#os-desktop {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+
+/* 任务栏 */
+body.dark #os-taskbar {
+  --bg: #111;
+  --bg1: #272727;
+  --bg2: #1f1f1f;
+  --bg3: #333;
+  --bg4: #474747;
+  --bg5: #3d3d3d;
+}
+body.light #os-taskbar {
+  --bg: #eee;
+}
+#os-taskbar {
+  z-index: 200;
+  position: absolute;
+  height: var(--s-taskbar-height);
+  top: var(--s-taskbar-position);
+  width: 100%;
+  background-color: var(--bg);
+  display: flex;
+  user-select: none;
+}
+#os-start {
+  margin-right: 2px;
+  display: flex;
+}
+#os-start > svg {
+  margin: calc( ( var(--s-taskbar-height) - 20px ) / 2 );
+  width: 20px;
+  height: 20px;
+  fill: var(--fgc);
+}
+#os-start:hover {
+  background-color: var(--bg1);
+}
+#os-start:active, #os-start.active {
+  background-color: var(--bg2);
+}
+#os-start:hover > svg {
+  fill: var(--theme);
+}
+#os-taskbar-tasks {
+  display: flex;
+}
+#os-taskbar-tasks > div {
+  width: 150px;
+  height: var(--s-taskbar-height);
+  display: flex;
+  margin: 0 5px;
+  border-bottom: 2px solid var(--theme);
+  box-sizing: border-box;
+  padding: 0 5px;
+}
+#os-taskbar-tasks > div:hover {
+  background-color: var(--bg1);
+  margin: 0px;
+  width: 160px;
+  padding: 0 10px;
+}
+#os-taskbar-tasks > div:active {
+  background-color: var(--bg2);
+}
+#os-taskbar-tasks > div > img {
+  margin: calc( ( var(--s-taskbar-height) - 24px ) / 2 ) 0;
+  margin-right: 5px;
+  width: 24px;
+  height: 24px;
+}
+#os-taskbar-tasks > div > p {
+  margin: calc( ( var(--s-taskbar-height) - 20px ) / 2 ) 0;
+  height: 20px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--fgc);
+  font-size: 15px;
+}
+#os-taskbar-tasks > div.focused {
+  background-color: var(--bg3);
+  margin: 0px;
+  width: 160px;
+  padding: 0 10px;
+}
+#os-taskbar-tasks > div.focused:hover {
+  background-color: var(--bg4);
+}
+#os-taskbar-tasks > div.focused:active {
+  background-color: var(--bg5);
+}
+
+
+/* 开始菜单 */
+body.dark #os-startmenu {
+  --bg: #1f1f1f;
+  --bg1: #2c2c2c;
+  --bg2: #414141;
+  --bg3: #353535;
+}
+body.light #os-startmenu {
+  --bg: #1f1f1f;
+}
+#os-startmenu {
+  z-index: 199;
+  position: absolute;
+  width: 600px;
+  --startmenu-height: 560px;
+  height: var(--startmenu-height);
+  left: 0;
+  bottom: var(--s-taskbar-height);
+  background-color: var(--bg);
+  box-shadow: 0 0 1px #000;
+  display: none;
+  user-select: none;
+  min-width: 300px;
+  min-height: 350px;
+  max-width: 800px;
+  max-height: 600px;
+}
+@keyframes os-start-popup {
+  0% {
+    bottom: calc( var(--s-taskbar-height) - var(--startmenu-height) / 4 );
+  }
+  20% {
+    bottom: calc( var(--s-taskbar-height) - var(--startmenu-height) / 16 );
+  }
+  100% {
+    bottom: var(--s-taskbar-height);
+  }
+}
+#os-startmenu.active {
+  animation: os-start-popup 0.2s;
+  display: flex;
+}
+#os-startmenu > .nav {
+  position: absolute;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 50px;
+  background-color: var(--bg);
+  transition: width 0.2s, background-color 0.2s;
+  overflow: hidden;
+}
+#os-startmenu > .nav:hover {
+  background-color: var(--bg1);
+  width: 200px;
+}
+#os-startmenu > .nav > div {
+  height: 50px;
+  display: flex;
+}
+#os-startmenu > .nav > div:hover {
+  background-color: var(--bg2);
+}
+#os-startmenu > .nav > div > img {
+  margin: 15px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+#os-startmenu > .nav > div > p {
+  margin: 15px 0;
+  color: var(--fgc);
+  white-space: nowrap;
+  font-size: 16px;
+  line-height: 20px;
+  height: 20px;
+}
+#os-startmenu > .list {
+  margin-left: 50px;
+  display: flex;
+  flex-direction: column;
+  width: 240px;
+  padding: 5px;
+}
+#os-startmenu > .list > div {
+  height: 40px;
+}
+#os-startmenu > .list > div:hover {
+  background-color: var(--bg3);
+}
+
+
+/* 窗口框架 */
+body.dark #os-app {
+  --hov: #fff3;
+}
+body.light #os-app {
+  --hov: #0003;
+}
+#os-app > div {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid #333;
+  box-shadow: 0 0 3px #000;
+  min-width: 160px;
+  min-height: 60px;
+}
+#os-app > div > .os-header {
+  height: 30px;
+  width: 100%;
+  background-color: var(--bgc);
+  display: flex;
+  user-select: none;
+}
+#os-app > div > .os-header > img {
+  margin: 6px;
+  height: 18px;
+  width: 18px;
+}
+#os-app > div > .os-header > p {
+  color: var(--fgc);
+  margin: 6px 0;
+  height: 18px;
+  line-height: 18px;
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.6;
+}
+#os-app > div.focused > .os-header > p {
+  opacity: 1;
+}
+#os-app > div > .os-header > div {
+  display: flex;
+  margin-left: auto;
+  opacity: 0.6;
+}
+#os-app > div.focused > .os-header > div {
+  opacity: 1;
+}
+#os-app > div > .os-header > div > svg:hover {
+  background-color: var(--hov);
+}
+#os-app > div > .os-header > div > svg:last-child:hover {
+  background-color: #e81123;
+}
+#os-app > div > .os-header > div > svg {
+  padding: 6px 14px;
+  height: 18px;
+  width: 18px;
+  stroke-width: 1px;
+  stroke: var(--fgc);
+  fill: none;
+}
+/* 三按钮动画 */
+@keyframes os-app-minimize {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5) translateY(100%);
+  }
+}
+#os-app > div.minimize {
+  animation: os-app-minimize 0.2s;
+}
+#os-app > div.minimize.rev {
+  animation: os-app-minimize 0.2s reverse;
+}
+@keyframes os-app-maximize {
+  0% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+#os-app > div.maximize {
+  animation: os-app-maximize 0.2s;
+}
+@keyframes os-app-maximize-rev {
+  0% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+#os-app > div.maximize.rev {
+  animation: os-app-maximize-rev 0.2s;
+}
+@keyframes os-app-close {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+#os-app > div.close {
+  animation: os-app-close 0.2s;
+}
