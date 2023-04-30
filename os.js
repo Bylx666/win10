@@ -110,6 +110,114 @@ function draggable(dom, isStartMenu) {
 }
 
 
+/* 
+  contextMenu(dom: 需要右键弹出菜单的dom, menuList: [{
+    name: 选项名字: String,
+    ev: 点击的回调函数: Function,
+    ?ico: 选项图标: String,
+    ?hr: 是否为<hr>元素: Boolean
+  }, {...}]): 返回同顺序的div列表，其中可以访问额外属性(cm[i]代表返回数组的项目):
+  cm[i].disabled: getter&setter: Boolean 使这个选项禁用或启用
+  cm[i].name: getter(): String, setter(v: String) 选项名字
+  cm[i].ev: getter&setter: Function 选项回调函数
+  cm[i].ico: getter&setter: String 选项图标
+*/
+function contextMenu(dom, menuList) {
+
+  var nl = [];
+
+  var div = document.createElement("div");
+  dom.append(div);
+  div.textContent = "";
+  div.classList.add("os-contextmenu");
+  div.onclick = (e)=> e.stopPropagation();
+
+  function da() {
+
+    div.style.cssText = `display: none;`;
+    document.removeEventListener("click", da);
+
+  }
+
+  for(let m of menuList) {
+
+    if(typeof m!=="object") {
+
+      nl.push(null);
+      continue;
+
+    }
+    if(m.hr) {
+
+      const hr = document.createElement("hr");
+      div.append(hr);
+      nl.push(hr);
+      continue;
+      
+    }
+
+    let ev = typeof m.ev==="function"?m.ev:null;
+    let disabled = false;
+    const p = document.createElement("p");
+    div.append(p);
+    if(typeof m.ico==="string") {
+
+      const img = document.createElement("img");
+      p.append(img);
+      img.src = m.ico;
+      Object.defineProperty(p, "ico", {get() {return img.src}, set(v) {img.src = v;}});
+
+    }
+    const np = document.createTextNode(m.name?m.name:"");
+    p.append(np);
+    p.onclick = ()=> {
+
+      da();
+      if(ev) ev();
+
+    };
+
+    Object.defineProperty(p, "ev", {get() {return ev}, set(v) {ev = typeof m.ev==="function"?m.ev:null;p.onclick = ev;}});
+    Object.defineProperty(p, "name", {get() {return np.textContent}, set(v) {np.textContent = v;}});
+    Object.defineProperty(p, "disabled", {get() {return disabled}, set(v) {
+      
+      if(v) {
+        
+        disabled = true;
+        p.classList.add("disabled");
+        p.onclick = null;
+
+      }
+      else {
+
+        disabled = false;
+        p.classList.remove("disabled");
+        p.onclick = ()=> {
+
+          da();
+          if(ev) ev();
+
+        };
+
+      }
+    
+    }});
+
+    nl.push(p);
+
+  }
+
+  dom.addEventListener("contextmenu", (e)=> {
+
+    div.style.cssText = `left: ${e.clientX}px; top: ${e.clientY}px; display: block;`;
+    document.addEventListener("click", da);
+
+  });
+  return nl;
+
+}
+
+
 // resolve path(源路径, 是否读取目录): 将win磁盘路径转化为可用的web路径。第二个参数若为真，且目标为系统目录的.path.json加上返回
 function resPath(p, d) {
 
@@ -130,19 +238,17 @@ var Win = {
   install(path) {
 
   },
-  // createRaw(文件内容, ?窗口名称, ?图标路径): 通过html代码直接构建窗口
-  createRaw(content, name, ico) {
+  // createRaw(文件内容, 选项: { param: 参数, name: 窗口名称, ico: 图标路径 }): 通过html代码直接构建窗口
+  createRaw(content, options) {
 
     /*
       可以在app中通过this访问窗口dom
-      this: HTMLDivElement
-      this.td: HTMLDivElement 对应任务栏的dom
-      this.focused: Boolean 是否聚焦
-      this.foc(): void 聚焦此窗口
+      详情见docs/app.md
     */
     var wd = document.createElement("div");
     $("os-app").append(wd);
 
+    if(!options) options = {};
 
     // 窗口头部
     var h = document.createElement("div");
@@ -172,6 +278,7 @@ var Win = {
     };
     h.onmousedown = headerMove;
 
+    var ico = options.ico;
     if(ico) {
 
       var i = document.createElement("img");
@@ -180,7 +287,7 @@ var Win = {
 
     }
 
-    name = name?name:"";
+    var name = options.name?options.name:"";
     var p = document.createElement("p");
     h.append(p);
     p.textContent = name;
@@ -196,7 +303,9 @@ var Win = {
 
     var c2 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     wc.append(c2);
-    c2.innerHTML = '<path d="M5 5L15 5L15 15L5 15z"/>';
+    var c2path1 = '<path d="M5 5L15 5L15 15L5 15z"/>';
+    var c2path2 = '<path d="M4 8L13 8L13 17L4 17zM7 5L16 5L16 14">';
+    c2.innerHTML = c2path1;
     c2.setAttribute("viewBox", "0 0 20 20");
 
     var c3 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -209,7 +318,7 @@ var Win = {
     var c = document.createElement("div");
     wd.append(c);
     c.innerHTML = content;
-    c.style.cssText = "width:100%;height:calc(100% - 30px);";
+    c.style.cssText = "width:100%;height:calc(100% - 30px);position:relative;";
 
 
     // 创建任务栏按钮
@@ -317,8 +426,11 @@ var Win = {
 
     function maximize() {
 
-      var oris = String(wd.style.cssText);
-      wd.style.cssText = "left:0;top:0;width:100%;height:calc(100% - var(--s-taskbar-height));";
+      var oris = [String(wd.style.left),String(wd.style.top),String(wd.style.width),String(wd.style.height)];
+      wd.style.left = "0";
+      wd.style.top = "0";
+      wd.style.width = "100%";
+      wd.style.height = "calc(100% - var(--s-taskbar-height))";
 
       var dragbar = wd.querySelector(".draggable");
       if(dragbar) dragbar.style.display = "none";
@@ -326,6 +438,7 @@ var Win = {
       h.onmousedown = null;
 
       wd.classList.add("maximize");
+      c2.innerHTML = c2path2;
       function c2F() {
 
         wd.classList.remove("maximize");
@@ -341,7 +454,12 @@ var Win = {
         h.onmousedown = headerMove;
 
         wd.classList.add("maximize", "rev");
-        wd.style.cssText = oris;
+        wd.style.left = oris[0];
+        wd.style.top = oris[1];
+        wd.style.width = oris[2];
+        wd.style.height = oris[3];
+
+        c2.innerHTML = c2path1;
         function _c2F() {
   
           wd.classList.remove("maximize", "rev");
@@ -354,9 +472,9 @@ var Win = {
 
     }
     c2.onclick = h.ondblclick = maximize;
-    wd.maximize = maximize;
     wd.c2 = c2;
 
+    wd.onshutdown = null;
     var shutdown = ()=> {
 
       wd.classList.add("close");
@@ -367,6 +485,8 @@ var Win = {
         wd.remove();
 
       };
+
+      if(typeof wd.onshutdown==="function") wd.onshutdown();
 
     }
     c3.onclick = shutdown;
@@ -387,6 +507,7 @@ var Win = {
     }
     wd.scopeStyle = scopeStyle;
     wd.runScript = runScript;
+    wd.param = options.param;
     runScript();
 
     
@@ -397,10 +518,11 @@ var Win = {
       for(let n = 0; n < sts.length; ++n) {
 
         if(sts[n].getAttribute("scoped")===null) continue;
-        const hash =Math.floor(Math.random()*32768);
+        const hash = Math.floor(Math.random()*32768);
         const sr = sts[n].sheet.cssRules;
         for(let o = 0; o < sr.length; ++o) {
 
+          if(!sr[o].selectorText) continue;
           sr[o].selectorText = sr[o].selectorText.replace(/\[scoped=(.+?)\]/g, "");
           const sd = c.querySelectorAll(sr[o].selectorText);
           for(let p = 0; p < sd.length; ++p) {
@@ -419,17 +541,31 @@ var Win = {
     return wd;
 
   },
-  // create(文件路径): 通过文件路径创建一个窗口
-  create(path) {
+  // create(文件路径, 参数): 通过文件路径创建一个窗口
+  create(path, param) {
 
+    var w = {
+      onload: null,
+      dom: null,
+      env: {}
+    };
     var p = resPath(path);
     req(p + "/manifest.json", (r)=> {
 
-      if(!r) return this.createRaw(path+"加载失败");
-      req(p+"/"+r.file, (_r)=> {
+      if(!r) r = {
+        file: "index.html",
+        name: "",
+        ico: "favicon.ico"
+      };
+      var fp = r.file?r.file:"html";
+      req(p+"/"+fp, (_r)=> {
         
         if(!_r) return this.createRaw("找不到文件"+p+"/"+r.file);
-        var wd = this.createRaw(_r.replace(/%app%/g, p), r.name?r.name:"", r.icon?(p+"/"+r.icon):null);
+        var wd = this.createRaw(_r.replace(/%app%/g, p), {
+          param: param,
+          name: r.name?r.name:"",
+          ico: r.icon?(p+"/"+r.icon):null
+        });
         if(r.size) {
 
           var rs = r.size.split(";");
@@ -443,16 +579,46 @@ var Win = {
         wd.style.top = (document.documentElement.clientHeight - dg.height) / 2 + "px";
         wd.style.left = (document.documentElement.clientWidth - dg.width) / 2 + "px";
 
+        if(typeof w==="function") w();
+
       });
+
+      return w;
 
     }, "json");
 
   },
+  // 环境变量列表
+  EVList: [],
+  // 后缀名关联列表
+  OAList: {},
+  // open(文件路径)打开文件
+  open(p) {
+
+    var pa = p.split(".");
+    var ft = pa[pa.length-1];
+    var oa = this.OAList[ft];
+    if(oa) Win.create(oa.app, p);
+    else this.createRaw("无此文件打开方式");
+
+  }
 };
+// 加载后缀名关系列表
+req("/asset/c/windows/oa_system.json", (r)=> {
+
+  if(!r) return Win.createRaw("无法获取文件打开方式");
+  Object.assign(Win.OAList, r);
+
+  onSystemLoaded();
+
+}, "json");
+
 
 var systemApp = [
   "c:/windows/explorer.exe",
-  "c:/windows/settings.exe"
+  "c:/windows/settings.exe",
+  "c:/windows/photo.exe",
+  "c:/windows/coder.exe",
 ];
 
 // 取消图片拖动和右键反应
@@ -481,4 +647,12 @@ $("os-start").onclick = function fc(e) {
 $("os-startmenu").onclick = (e)=> e.stopPropagation();
 draggable($("os-startmenu"), true);
 
-Win.create(systemApp[0]);
+
+// 系统网络部分加载完成的回调
+function onSystemLoaded() {
+
+  Win.create(systemApp[0]);
+  Win.create(systemApp[3], "c:/windows/coder.exe/index.html");
+
+}
+

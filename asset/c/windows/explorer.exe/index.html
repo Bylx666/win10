@@ -507,7 +507,7 @@
           else if(ft==="html") ficon.src = "%app%/asset/bat_small.png";
           else if(ft==="ico") ficon.src = "%app%/asset/picfile.png";
           else if(ft==="png"||ft==="jpg"||ft==="webp"||ft==="gif") ficon.src = "%app%/asset/pic.png";
-          else if(ft==="txt") ficon.src = "%app%/asset/txt.png";
+          else if(Win.OAList[ft]) ficon.src = Win.OAList[ft].ico;
           else ficon.src = "%app%/asset/file.png";
 
           fnameDiv.append(r[i].name);
@@ -534,13 +534,19 @@
 
           if(isDir) {
 
-            d.ondblclick = ()=> {
+            if(ft==="exe") d.ondblclick = ()=> Win.create(p+fn);
+            else d.ondblclick = ()=> {
               
               var np = p+fn+"/";
               ehistory.add(np);
               renderContent(np);
               
             }
+
+          }
+          else {
+
+            d.ondblclick = ()=> Win.open(p+fn);
 
           }
 
@@ -584,6 +590,7 @@
 
           }
           else if(isDir) ficon.src = "%app%/asset/dir.png";
+          else if(fn===".path.json") ficon.src = "%app%/asset/inffile_small.png";
           else if(ft==="ico"||ft==="png"||ft==="webp"||ft==="jpg") ficon.src = resPath(p+fn);
           else ficon.src = "%app%/asset/file.png";
 
@@ -593,13 +600,19 @@
 
           if(isDir) {
 
-            d.ondblclick = ()=> {
+            if(ft==="exe") d.ondblclick = ()=> Win.create(p+fn);
+            else d.ondblclick = ()=> {
               
               var np = p+r[i].name+"/";
               ehistory.add(np);
               renderContent(np);
               
             }
+
+          }
+          else {
+
+            d.ondblclick = ()=> Win.open(p+fn);
 
           }
 

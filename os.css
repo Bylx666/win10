@@ -53,6 +53,53 @@ body.light {
   height: 100%;
 }
 
+/* 右键菜单 用法：<div class="os-contextmenu"><p>选项1</p><p>选项2</p><hr/></div> */
+body.dark .os-contextmenu {
+  --bg: #222;
+  --bdc: #aaa;
+  --bg1: #aaa5;
+}
+.os-contextmenu {
+  position: fixed;
+  display: none;
+  background-color: var(--bg);
+  color: var(--fgc);
+  border: 1px solid var(--bdc);
+  padding: 5px 2px;
+  box-shadow: 5px 1px 3px #000;
+  cursor: default;
+}
+.os-contextmenu > p {
+  margin: 0;
+  padding: 2px 30px;
+  font-size: 15px;
+  line-height: 20px;
+  height: 20px;
+  user-select: none;
+  position: relative;
+}
+.os-contextmenu > p:hover {
+  background-color: var(--bg1);
+}
+.os-contextmenu > p.disabled {
+  color: var(--bdc);
+}
+.os-contextmenu > p.disabled:hover {
+  background-color: #0000;
+}
+.os-contextmenu > p > img {
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 20px;
+  height: 20px;
+}
+.os-contextmenu > hr {
+  margin: 2px 5px;
+  border: none;
+  border-top: 1px solid var(--bdc);
+}
+
 /* draggable函数所使用的样式 */
 .draggable > div {
   position: absolute;
@@ -120,11 +167,11 @@ body.light {
 /* 任务栏 */
 body.dark #os-taskbar {
   --bg: #111;
-  --bg1: #272727;
-  --bg2: #1f1f1f;
-  --bg3: #333;
-  --bg4: #474747;
-  --bg5: #3d3d3d;
+  --bg-opac: #111c;
+  --bg1: #eee2;
+  --bg2: #eee1;
+  --bg3: #eee3;
+  --bg4: #eee4;
 }
 body.light #os-taskbar {
   --bg: #eee;
@@ -135,9 +182,10 @@ body.light #os-taskbar {
   height: var(--s-taskbar-height);
   top: var(--s-taskbar-position);
   width: 100%;
-  background-color: var(--bg);
+  background-color: var(--bg-opac);
   display: flex;
   user-select: none;
+  backdrop-filter: blur(5px);
 }
 #os-start {
   margin-right: 2px;
@@ -204,16 +252,17 @@ body.light #os-taskbar {
   background-color: var(--bg4);
 }
 #os-taskbar-tasks > div.focused:active {
-  background-color: var(--bg5);
+  background-color: var(--bg3);
 }
 
 
 /* 开始菜单 */
 body.dark #os-startmenu {
-  --bg: #1f1f1f;
-  --bg1: #2c2c2c;
-  --bg2: #414141;
-  --bg3: #353535;
+  --bg: #222;
+  --bg-opac: #222c;
+  --bg1: #ccc2;
+  --bg2: #ccc4;
+  --bg3: #ccc3;
 }
 body.light #os-startmenu {
   --bg: #1f1f1f;
@@ -226,7 +275,8 @@ body.light #os-startmenu {
   height: var(--startmenu-height);
   left: 0;
   bottom: var(--s-taskbar-height);
-  background-color: var(--bg);
+  background-color: var(--bg-opac);
+  backdrop-filter: blur(5px);
   box-shadow: 0 0 1px #000;
   display: none;
   user-select: none;
@@ -237,9 +287,11 @@ body.light #os-startmenu {
 }
 @keyframes os-start-popup {
   0% {
+    opacity: 0;
     bottom: calc( var(--s-taskbar-height) - var(--startmenu-height) / 4 );
   }
-  20% {
+  30% {
+    opacity: 1;
     bottom: calc( var(--s-taskbar-height) - var(--startmenu-height) / 16 );
   }
   100% {
@@ -256,7 +308,6 @@ body.light #os-startmenu {
   display: flex;
   flex-direction: column;
   width: 50px;
-  background-color: var(--bg);
   transition: width 0.2s, background-color 0.2s;
   overflow: hidden;
 }

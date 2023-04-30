@@ -1,0 +1,603 @@
+<div id="toolbar">
+  <span id="toolbar-open">Open</span>
+  <span id="toolbar-save">Save</span>
+  <span id="toolbar-saveas">Save as</span>
+  <span id="toolbar-upload">Upload</span>
+</div>
+<div id="main">
+  <textarea id="inp"></textarea>
+  <div id="line-num"></div>
+  <div id="content"></div>
+</div>
+<style scoped>
+  @font-face {
+    font-family: "cascadia_code";
+    src: url(%app%/Cascadia-Code-Regular.ttf);
+  }
+  
+  body.dark #toolbar {
+    --bg1: #ddd5;
+    --bg2: #ddda;
+  }
+  #toolbar {
+    height: 30px;
+    background-color: var(--bgc);
+    color: var(--fgc);
+    box-shadow: 0 0 3px var(--bgc);
+    display: flex;
+    border-bottom: 2px solid var(--theme);
+    box-sizing: border-box;
+    font-family: "cascadia_code", SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+  }
+  #toolbar > span {
+    padding: 3px 10px;
+    line-height: 24px;
+    display: flex;
+    height: 24px;
+    font-size: 16px;
+    user-select: none;
+    cursor: pointer;
+  }
+  #toolbar > span:hover {
+    background-color: var(--bg1);
+  }
+  #toolbar > span:active {
+    background-color: var(--bg2);
+  }
+  #toolbar > span > svg {
+    padding: 3px;
+    width: 18px;
+    height: 18px;
+    fill: var(--fgc);
+  }
+
+  body.dark #main {
+    --bg1: #aaa;
+    --bg2: #333;
+    --sel: #aaa5;
+  }
+  #main {
+    display: flex;
+    height: calc(100% - 30px);
+    overflow: hidden;
+    font-family: "cascadia_code", SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+    background-color: var(--bg1);
+  }
+  #inp {
+    position: absolute;
+    width: 0px;height: 0px;
+    padding: 0;
+    border: none;
+  }
+
+  #line-num {
+    width: 50px;
+    padding: 10px;
+    user-select: none;
+    position: relative;
+  }
+  #line-num > p {
+    padding: 0 5px;
+    text-align: right;
+    color: var(--bg2);
+  }
+
+  #content {
+    flex-grow: 1;
+    outline: none;
+    background-color: var(--bg2);
+    box-shadow: 0 0 3px var(--bg2);
+    caret-color: var(--fgc);
+    color: var(--fgc);
+    padding: 10px 0;
+    cursor: text;
+    overflow: auto;
+    position: relative;
+    caret-color: transparent;
+  }
+  #content > p {
+    margin: 0;
+    padding: 0 10px;
+  }
+  #content > p.select {
+    background-color: var(--sel);
+  }
+  #content > p::selection, #content > p > span::selection {
+    background-color: var(--sel);
+    text-shadow: 0 0 3px var(--fgc);
+  }
+
+  #content > p > .select {
+    box-shadow: 1px 1px 5px var(--bgc);
+    text-shadow: 0 0 3px var(--fgc);
+    background-color: var(--sel);
+    outline: 1px solid var(--sel);
+  }
+
+  #line-num > p, #content > p {
+    font-size: 16px;
+    height: 20px;
+    line-height: 20px;
+    margin: 0;
+    white-space: pre;
+  }
+
+  @keyframes cursor-blink {
+    0% {
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 1;
+    }
+    60% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+  #cursor {
+    position: absolute;
+    width: 2px;
+    height: 20px;
+    background-color: var(--bg1);
+    box-shadow: 1px 1px 3px var(--fgc);
+    animation: cursor-blink 1s linear infinite;
+  }
+</style>
+<script>
+
+if(app.param) {
+
+  req(resPath(app.param), m);
+  const na = app.param.split("/");
+  app.name = na[na.length-1];
+
+}
+else {
+
+  m("");
+  app.name = "Untitled";
+
+}
+
+function m(doc) {
+
+  var lines = doc.split("\n");
+
+  // 光标的位置[行，列]
+  var si = [0, 0];
+  // 选中的[行1, 列1, 行2, 列2]
+  var so = [0, 0, 0, 0];
+
+  // 工具dom
+  var tmpCanvas = document.createElement("canvas").getContext("2d");
+  tmpCanvas.font = "16px cascadia_code";
+  var mt = (t)=> tmpCanvas.measureText(t).width;
+  var cursor = document.createElement("div");
+  cursor.id = "cursor";
+  function cursorStyle() {
+
+    // 设置光标位置
+    cursor.style.top = si[0] * 20 + 10 + "px";
+    cursor.style.left = mt(lines[si[0]].slice(0, si[1])) + 10 + "px";
+    // 使选中行改样式
+    for(const sp of $("content").querySelectorAll("p.select")) sp.classList.remove("select");
+    $("content").children[si[0]].classList.add("select");
+
+  }
+  var inp = $("inp");
+  var delSel = null;
+
+  // 渲染主内容
+  function renderLines() {
+
+    $("line-num").textContent = "";
+    $("content").textContent = "";
+    for(let i = 0; i < lines.length; ++i) {
+
+      const lp = document.createElement("p");
+      $("line-num").append(lp);
+      lp.textContent = i+1;
+
+      const p = document.createElement("p");
+      $("content").append(p);
+      p.textContent = lines[i];
+      p.style.width = mt(lines[i])+"px";
+
+    }
+    $("content").append(cursor);
+
+    app.scopeStyle();
+
+  }
+  renderLines();
+
+  
+  // 主内容鼠标按下检测选中了第几行第几个字
+  function getTextPos(e) {
+
+    var _s = [0,0];
+    var cba = $("content").getBoundingClientRect();
+    var l = e.clientX - cba.left - 10 + $("content").scrollLeft;
+    var t = e.clientY - cba.top - 10 + $("content").scrollTop;
+
+    _s[0] = Math.floor(t / 20);
+    if(_s[0] > lines.length - 1) _s[0] = lines.length - 1;
+    if(_s[0] < 0) _s[0] = 0;
+
+    var st = lines[_s[0]];
+    if(l > mt(st) + mt(st[st.length-1])/2) _s[1] = st.length;
+    else if(l <= mt(st[0])/2) _s[1] = 0;
+    else for(let i = 0; i < st.length; ++i) {
+
+      // 后面加半个字宽度是为了优化选中手感
+      if(
+        l > (mt(st.slice(0, i)) + mt(st[i])/2)&&
+        l <= (mt(st.slice(0, i+1)) + mt(st[i+1])/2)
+      ) {
+
+        _s[1] = i+1;
+        break;
+
+      };
+
+    }
+
+    return _s;
+
+  }
+  $("content").onmousedown = (e)=> {
+
+    // 防止点滚动条触发
+    var ctt = $("content");
+    var cba = ctt.getBoundingClientRect();
+    if(e.clientX>cba.left+ctt.clientWidth||e.clientY>cba.top+ctt.clientHeight) return false;
+
+    var tpBegin = getTextPos(e);
+    var st = lines[tpBegin[0]];
+    si = tpBegin;
+
+    cursorStyle();
+
+    // 选中事件（非浏览器api）
+    function mu(_e) {
+
+      if(e.button===2) return;
+
+      var tpEnd = getTextPos(_e);
+      // 如果鼠标出了文本区直接判定全选至起点或终点，优化选择手感
+      if(_e.clientX<cba.left||_e.clientY<cba.top) tpEnd = [0, 0];
+      if(_e.clientX>cba.left+cba.width||_e.clientY>cba.top+cba.height) 
+        tpEnd = [lines.length-1, lines[lines.length-1].length];
+
+      // 先取消选中的span
+      for(const selspan of $("content").querySelectorAll("span.select"))
+        selspan.classList.remove("select");
+
+      var lda = $("content").querySelectorAll("p");
+      var esca = (st)=> st.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      var txtForCopy = "";
+
+      var t1 = (tpBegin[1]>tpEnd[1])?tpEnd[1]:tpBegin[1];
+      var t2 = (tpBegin[1]>tpEnd[1])?tpBegin[1]:tpEnd[1];
+
+      var t3 = (tpBegin[0]>tpEnd[0])?tpEnd[0]:tpBegin[0];
+      var t4 = (tpBegin[0]>tpEnd[0])?tpBegin[0]:tpEnd[0];
+
+      var t5 = tpBegin[0]<tpEnd[0]?tpBegin[1]:tpEnd[1];
+      var t6 = tpBegin[0]<tpEnd[0]?tpEnd[1]:tpBegin[1];
+
+      if(t3===t4) {
+
+        if(t1!==t2) {
+
+          const ol = lines[t3];
+          lda[t3].innerHTML = esca(ol.slice(0, t1))+
+            '<span class="select">'+
+            esca(ol.slice(t1, t2))+
+            '</span>'+
+            esca(ol.slice(t2));
+            
+          txtForCopy = ol.slice(t1, t2);
+          
+        }
+
+      }
+      else for(let i = t3; i < t4+1; ++ i) {
+
+        const ol = lines[i];
+        if(i===t3) {
+          
+          lda[i].innerHTML = esca(ol.slice(0, t5))+
+            '<span class="select">'+
+            esca(ol.slice(t5))+
+            '</span>';
+
+          txtForCopy += ol.slice(t5) + "\n";
+
+        }
+        else if(i===t4) {
+          
+          lda[i].innerHTML ='<span class="select">'+
+            esca(ol.slice(0, t6))+
+            '</span>'+
+            esca(ol.slice(t6));
+
+          txtForCopy += ol.slice(0, t6);
+
+        }
+        else {
+
+          lda[i].innerHTML = '<span class="select">'+esca(ol)+'</span>';
+
+          txtForCopy += ol+"\n";
+
+        }
+
+      }
+      
+      document.removeEventListener("mouseup", mu);
+      selection = [...tpBegin, ...tpEnd];
+      inp.value = txtForCopy;
+      inp.focus();
+      inp.select();
+      app.scopeStyle();
+
+      // 如果键盘输入就调用这个函数删除所有已选部分
+      if(!(t3===t4&&t1===t2)) delSel = ()=> {
+
+        if(t3===t4) {
+
+          if(t1!==t2) {
+
+            lines[t3] = lines[t3].slice(0, t1) + lines[t3].slice(t2);
+            si[1] = t1;
+            
+          }
+
+        }
+        else {
+
+          lines[t3] = lines[t3].slice(0, t5) + lines[t4].slice(t6);
+          lines.splice(t3+1, t4-t3);
+          si[0] = t3;
+          si[1] = t5;
+          renderLines();
+
+        }
+
+        delSel = null;
+        cursorStyle();
+
+      };
+
+    }
+    document.addEventListener("mouseup", mu);
+
+  };
+
+  inp.onblur = ()=> {
+
+    cursor.style.display = "none";
+
+  };
+  inp.onfocus = ()=> {
+
+    cursor.style.display = null;
+
+  };
+
+
+  // 键盘代理
+  // 移动光标一格
+  function moveCur(k) {
+
+    if(k==="ArrowLeft") {
+      
+      if(--si[1]<0) {
+
+        if(si[0]===0) return ++si[1];
+        si[1] = lines[--si[0]].length;
+
+      }
+
+    }
+    if(k==="ArrowRight") {
+
+      if(++si[1]>lines[si[0]].length) {
+
+        if(si[0]===lines.length-1) return --si[1];
+        ++si[0];
+        si[1] = 0;
+
+      }
+
+    };
+    if(k==="ArrowDown") {
+
+      if(++si[0]>lines.length-1) si[0] = lines.length-1;
+      if(si[1]>lines[si[0]].length) si[1] = lines[si[0]].length;
+
+    }
+    if(k==="ArrowUp") {
+      
+      if(--si[0]<0) si[0] = 0;
+      if(si[1]>lines[si[0]].length) si[1] = lines[si[0]].length;
+
+    }
+
+    cursorStyle();
+
+  };
+  // 写
+  function typ(dat) {
+
+    if(!dat) return 0;
+    
+    if(delSel) delSel();
+    
+    // 像粘贴这样可能会输入换行符的单独处理
+    if(dat.includes("\n")) {
+
+      const dar = dat.split("\n");
+      for(let i = 0; i < dar.length; ++i) {
+
+        lines.splice(++si[0], 0, dar[i]);
+
+      }
+
+      renderLines();
+      cursorStyle();
+      return 0;
+
+    }
+
+    var lda = $("content").querySelectorAll("p");
+    var l = lines[si[0]];
+
+    // 自动补全
+    var filled = true;
+    if(dat==="'") dat+="'";
+    else if(dat==="\"") dat+="\"";
+    else if(dat==="<") dat+=">";
+    else if(dat==="{") dat+="}";
+    else if(dat==="[") dat+="]";
+    else if(dat==="(") dat+=")";
+    else if(dat==="`") dat+="`";
+    else filled = false;
+    lines[si[0]] = l.slice(0, si[1]) + dat + l.slice(si[1]);
+    si[1] += dat.length + (filled?-1:0);
+
+    lda[si[0]].textContent = lines[si[0]];
+    lda[si[0]].style.width = mt(lines[si[0]]) + "px"
+    
+    cursorStyle();
+
+  }
+  // 删一个字
+  function del() {
+
+    if(delSel) {
+
+      delSel();
+      renderLines();
+      return 0;
+
+    }
+
+    var lda = $("content").querySelectorAll("p");
+    var l = lines[si[0]];
+
+    // 如果选中的位置前面没字可删就删行
+    if(--si[1]<0) {
+
+      if(si[0]===0) {
+
+        si[1] = 0;
+        return 0;
+
+      }
+      lines[si[0]-1] += l;
+      lines.splice(si[0], 1);
+
+      renderLines();
+
+      si[1] = lines[--si[0]].length-l.length;
+
+    }
+
+    else {
+
+      lines[si[0]] = l.slice(0, si[1]) + l.slice(si[1]+1);
+
+      lda[si[0]].textContent = lines[si[0]];
+      lda[si[0]].style.width = mt(lines[si[0]]) + "px"
+
+    }
+    
+    cursorStyle();
+
+  }
+  // 新一行
+  function nl() {
+
+    if(delSel) delSel();
+    
+    var l = lines[si[0]];
+    lines[si[0]] = l.slice(0 ,si[1]);
+    var spaces = lines[si[0]].match(/(^\s*)/)[0];// 为开头自动加空格
+    lines.splice(++si[0], 0, spaces + l.slice(si[1]));
+    renderLines();
+
+    si[1] = spaces.length;
+    cursorStyle();
+
+  }
+
+  inp.oninput = (e)=> typ(e.data);
+  // 防止输入法的重复data写入
+  inp.addEventListener("compositionstart", ()=> inp.oninput = null);
+  inp.addEventListener("compositionend", ()=> inp.oninput = (e)=> typ(e.data));
+
+
+  function keyd(e) {
+
+    e.stopPropagation();
+
+    var k = e.code;
+    var pd = true;
+
+    if(k==="Backspace") del();
+    else if(k==="Tab") typ("  ");
+    else if(k==="Enter") nl();
+    else if(k==="ArrowLeft"||k==="ArrowRight"||k==="ArrowUp"||k==="ArrowDown") moveCur(k);
+    else if(k==="KeyX"&&e.ctrlKey) {
+
+      inp.select();
+      document.execCommand("copy");
+      del();
+
+    }
+    else pd = false;
+
+    if(pd) e.preventDefault();
+
+  }
+  inp.onkeydown = keyd;
+
+  $("content").onscroll = ()=> $("line-num").style.top = - $("content").scrollTop + "px";
+
+
+  var clipb = "";
+  $("main").addEventListener("copy", ()=> clipb = String(inp.value));
+  // 创建右键菜单
+  var cm = contextMenu($("main"), [{
+    "name": "cut(ctrl+x)",
+    ev() {
+
+      inp.select();
+      document.execCommand("copy");
+      del();
+
+    }
+  }, {
+    "name": "copy(ctrl+c)",
+    ev() {
+
+      inp.select();
+      document.execCommand("copy");
+
+    } 
+  }, {
+    "name": "paste(ctrl+v)",
+    ev() {typ(clipb)}
+  }]);
+
+  app.style.fontFamily = '"cascadia_code", SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace';
+
+};
+</script>

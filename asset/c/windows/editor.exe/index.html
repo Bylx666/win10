@@ -1,0 +1,279 @@
+<div id="toolbar">
+  <span id="toolbar-open"><svg viewBox="0 0 1024 1024"><path d="M870.62 240.77H467.21c0-49.51-40.14-89.64-89.64-89.64H153.46c-49.53 0-89.65 40.13-89.65 89.64v627.52c0 49.51 40.12 89.65 89.65 89.65h717.17c49.52 0 89.64-40.13 89.64-89.65V330.42c-0.01-49.51-40.13-89.65-89.65-89.65z m0 582.69c0 24.76-20.08 44.82-44.83 44.82H198.28c-24.75 0-44.82-20.07-44.82-44.82V509.71h717.17v313.75z m-44.83-403.39H153.46v-179.3c0.22 0.23 20.07 0 44.82 0h134.47c24.75 0 44.77 0.06 44.83 0v89.65H825.8c24.75 0 44.83 20.07 44.83 44.82-0.01 24.75-20.09 44.83-44.84 44.83z"></path></svg>打开</span>
+  <span id="toolbar-save"><svg viewBox="0 0 1024 1024"><path d="M134.9 64.19v895.62h754.2V64.19H134.9z m282.82 94.28h188.55v141.41H417.72V158.47z m377.11 707.06H229.17V158.47h94.28v235.69h377.1V158.47h94.28v707.06zM323.45 629.84h377.1v-94.28h-377.1v94.28z"></path></svg>保存</span>
+  <span id="toolbar-saveas"><svg viewBox="0 0 1024 1024"><path d="M865.76 865.74H158.24V158.26h283.02V63.92H63.92v896.16h896.16V582.75h-94.32v282.99z m-283-801.82v94.34h239.86L313.07 667.8l66.71 66.7 485.98-485.99v192.73h94.32V63.92H582.76z"></path></svg>另存为</span>
+  <span id="toolbar-upload"><svg viewBox="0 0 1024 1024"><path d="M518.3 459c-3.2-4.1-9.4-4.1-12.6 0l-112 141.7c-4.1 5.2-0.4 12.9 6.3 12.9h73.9V856c0 4.4 3.6 8 8 8h60c4.4 0 8-3.6 8-8V613.7H624c6.7 0 10.4-7.7 6.3-12.9L518.3 459z"></path><path d="M811.4 366.7C765.6 245.9 648.9 160 512.2 160S258.8 245.8 213 366.6C127.3 389.1 64 467.2 64 560c0 110.5 89.5 200 199.9 200H304c4.4 0 8-3.6 8-8v-60c0-4.4-3.6-8-8-8h-40.1c-33.7 0-65.4-13.4-89-37.7-23.5-24.2-36-56.8-34.9-90.6 0.9-26.4 9.9-51.2 26.2-72.1 16.7-21.3 40.1-36.8 66.1-43.7l37.9-9.9 13.9-36.6c8.6-22.8 20.6-44.1 35.7-63.4 14.9-19.2 32.6-35.9 52.4-49.9 41.1-28.9 89.5-44.2 140-44.2s98.9 15.3 140 44.2c19.9 14 37.5 30.8 52.4 49.9 15.1 19.3 27.1 40.7 35.7 63.4l13.8 36.5 37.8 10C846.1 454.5 884 503.8 884 560c0 33.1-12.9 64.3-36.3 87.7-23.4 23.4-54.5 36.3-87.6 36.3H720c-4.4 0-8 3.6-8 8v60c0 4.4 3.6 8 8 8h40.1C870.5 760 960 670.5 960 560c0-92.7-63.1-170.7-148.6-193.3z"></path></svg>上传</span>
+</div>
+<div id="main">
+  <textarea id="inp"></textarea>
+  <div id="line-num"></div>
+  <div id="content"></div>
+</div>
+<style>
+  @font-face {
+    font-family: "cascadia_code";
+    src: url(%app%/Cascadia-Code-Regular.ttf);
+  }
+  
+  body.dark #toolbar {
+    --bg1: #ddd5;
+    --bg2: #ddda;
+  }
+  #toolbar {
+    height: 30px;
+    background-color: var(--bgc);
+    color: var(--fgc);
+    box-shadow: 0 0 3px var(--bgc);
+    display: flex;
+    border-bottom: 2px solid var(--theme);
+    box-sizing: border-box;
+  }
+  #toolbar > span {
+    padding: 3px 10px;
+    line-height: 24px;
+    display: flex;
+    height: 24px;
+    font-size: 16px;
+    user-select: none;
+    cursor: pointer;
+  }
+  #toolbar > span:hover {
+    background-color: var(--bg1);
+  }
+  #toolbar > span:active {
+    background-color: var(--bg2);
+  }
+  #toolbar > span > svg {
+    padding: 3px;
+    width: 18px;
+    height: 18px;
+    fill: var(--fgc);
+  }
+
+  body.dark #main {
+    --bg1: #aaa;
+    --bg2: #333;
+    --sel: #aaa5;
+  }
+  #main {
+    display: flex;
+    height: calc(100% - 30px);
+    overflow: hidden;
+    font-family: "cascadia_code", SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+  }
+  #inp {
+    position: absolute;
+    width: 0px;height: 0px;
+    padding: 0;
+    border: none;
+  }
+
+  #line-num {
+    width: 50px;
+    background-color: var(--bg1);
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    user-select: none;
+  }
+  #line-num > p {
+    padding: 0 5px;
+    text-align: right;
+    color: var(--bg2);
+  }
+
+  #content {
+    flex-grow: 1;
+    outline: none;
+    background-color: var(--bg2);
+    box-shadow: 0 0 3px var(--bg2);
+    caret-color: var(--fgc);
+    color: var(--fgc);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    cursor: text;
+    overflow: auto;
+    position: relative;
+  }
+  #content > p {
+    margin: 0;
+  }
+  #content > p::selection, #content > p > span::selection {
+    background-color: var(--sel);
+  }
+
+  #content > p > .select {
+    box-shadow: 0px 1px 3px var(--bgc);
+    background-color: var(--sel);
+  }
+
+  #line-num > p, #content > p {
+    height: 20px;
+    line-height: 20px;
+    font-size: 16px;
+    margin: 0;
+    white-space: pre;
+  }
+
+  @keyframes cursor-blink {
+    0% {
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 1;
+    }
+    60% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+  #cursor {
+    position: absolute;
+    width: 2px;
+    height: 20px;
+    background-color: var(--bg1);
+    box-shadow: 1px 1px 3px var(--fgc);
+    animation: cursor-blink 1s linear infinite;
+  }
+</style>
+<script>
+
+  // 原文读取
+  var doc = `est
+测速ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+tes`;
+  var lines = doc.split("\n");
+
+  // 光标的位置[行，列]
+  var selecting = [0, 0];
+  // 选中的[行1, 列1, 行2, 列2]
+  var selection = [0, 0, 0, 0];
+
+  // 工具dom
+  var cursor = document.createElement("div");
+  cursor.id = "cursor";
+  var tmpCanvas = document.createElement("canvas").getContext("2d");
+  tmpCanvas.font = "16px cascadia_code";
+  var mt = (t)=> tmpCanvas.measureText(t).width;
+  var inp = $("inp");
+
+  // 渲染主内容
+  function renderLines() {
+
+    $("line-num").textContent = "";
+    $("content").textContent = "";
+    for(let i = 0; i < lines.length; ++i) {
+
+      const lp = document.createElement("p");
+      $("line-num").append(lp);
+      lp.textContent = i+1;
+
+      const p = document.createElement("p");
+      $("content").append(p);
+      p.textContent = lines[i];
+
+    }
+    $("content").append(cursor);
+
+  }
+  renderLines();
+
+  
+  // 主内容鼠标按下检测选中了第几行第几个字
+  function getTextPos(e) {
+
+    var _s = [0,0];
+    var cba = $("content").getBoundingClientRect();
+    var l = e.clientX - cba.left - 10 + $("content").scrollLeft;
+    var t = e.clientY - cba.top - 10 + $("content").scrollTop;
+
+    _s[0] = Math.floor(t / 20);
+    if(_s[0] > lines.length - 1) _s[0] = lines.length - 1;
+    if(_s[0] < 0) _s[0] = 0;
+
+    var st = lines[_s[0]];
+    if(l > mt(st) + mt(st[st.length-1])/2) _s[1] = st.length;
+    else if(l <= mt(st[0])/2) _s[1] = 0;
+    else for(let i = 0; i < st.length; ++i) {
+
+      // 后面加半个字宽度是为了优化选中手感
+      if(
+        l > (mt(st.slice(0, i)) + mt(st[i])/2)&&
+        l <= (mt(st.slice(0, i+1)) + mt(st[i+1])/2)
+      ) {
+
+        _s[1] = i+1;
+        break;
+
+      };
+
+    }
+
+    return _s;
+
+  }
+  $("content").onmousedown = (e)=> {
+
+    var tpBegin = getTextPos(e);
+    var st = lines[tpBegin[0]];
+    selecting = tpBegin;
+    cursor.style.top = tpBegin[0] * 20 + 10 + "px";
+    cursor.style.left = tmpCanvas.measureText(st.slice(0, tpBegin[1])).width + 10 + "px";
+
+    // 选中事件（非浏览器api）
+    function mu(_e) {
+
+      var tpEnd = getTextPos(_e);
+
+      // 先取消选中的span
+      var selectedSpans = $("content").querySelectorAll(".select");
+      for(const selspan of selectedSpans) {
+
+        selspan.classList.remove("select");
+
+      }
+
+      var lda = $("content").querySelectorAll("p");
+      var t1 = (tpBegin[1]>tpEnd[1])?tpEnd[1]:tpBegin[1];
+      var t2 = (tpBegin[1]>tpEnd[1])?tpBegin[1]:tpEnd[1];
+      if(1) {
+
+        const ol = lines[tpBegin[0]];
+        lda[tpBegin[0]].innerHTML = ol.slice(0, t1)+
+          '<span class="select">'+
+          ol.slice(t1, t2)+
+          '</span>'+
+          ol.slice(t2);
+          
+
+      }
+      
+      document.removeEventListener("mouseup", mu);
+      inp.focus();
+
+    }
+    document.addEventListener("mouseup", mu);
+    
+
+  };
+
+  inp.onblur = ()=> {
+
+    cursor.style.display = "none";
+
+  };
+  inp.onfocus = ()=> {
+
+    cursor.style.display = null;
+
+  };
+
+  // inp.oninput = (e)=> {console.log(e);};
+
+</script>

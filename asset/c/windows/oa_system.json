@@ -1,0 +1,26 @@
+{
+  "ico": {
+    "app": "c:/windows/photo.exe",
+    "ico": "c:/windows/photo.exe/favicon.png"
+  },
+  "png": {
+    "app": "c:/windows/photo.exe",
+    "ico": "c:/windows/photo.exe/favicon.png"
+  },
+  "jpg": {
+    "app": "c:/windows/photo.exe",
+    "ico": "c:/windows/photo.exe/favicon.png"
+  },
+  "webp": {
+    "app": "c:/windows/photo.exe",
+    "ico": "c:/windows/photo.exe/favicon.png"
+  },
+  "gif": {
+    "app": "c:/windows/photo.exe",
+    "ico": "c:/windows/photo.exe/favicon.png"
+  },
+  "json": {
+    "app": "c:/windows/coder.exe",
+    "ico": "c:/windows/explorer.exe/inffile.png"
+  }
+}

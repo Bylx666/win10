@@ -1,0 +1,302 @@
+<div id="root">
+  <div id="main-cont">
+    <img id="main">
+  </div>
+  </div>
+  <div id="change">
+    <div id="change-prev"></div>
+    <div id="change-next"></div>
+  </div>
+  <div id="detail">
+    <p>名称 <input id="detail-name" type="text"></p>
+    <p>路径 <input id="detail-path" type="text"><span id="detail-path-copy">复制</span></p>
+    <p>尺寸 <span id="detail-resolution"></span></p>
+    <p>大小 <span id="detail-size"></span></p>
+    <p>缩放 <input id="detail-scale" value="1" type="text"><span id="detail-scale-reset">重置</span></p>
+    <p>旋转 <span id="detail-rotate-l"><svg viewBox="0 0 1024 1024"><path d="M288 352v192h128v64h-128v64h192v-320h-192z m128 128h-64v-64h64v64zM544 352v320h192v-320h-192z m128 256h-64v-192h64v192zM957.44 531.84h1.344v-1.92l-1.344 1.92z"></path><path d="M46.72 474.88l35.84 55.04 1.28 1.92 35.84 55.04 60.16-119.04-32 1.92C168.96 277.76 331.52 128 529.28 128c211.904 0 384 172.16 384 384s-172.096 384-384 384c-140.16 0-263.04-75.52-329.6-188.16h-1.92l-0.64 0.64-53.12 31.36A446.592 446.592 0 0 0 529.28 960c247.744 0 448-200.32 448-448s-200.256-448-448-448C294.4 64 102.4 243.84 83.2 472.96l-36.48 1.92z"></path></svg></span><span id="detail-rotate-r"><svg viewBox="0 0 1024 1024"><path d="M288 352v192h128v64h-128v64h192v-320h-192z m128 128h-64v-64h64v64zM544 352v320h192v-320h-192z m128 256h-64v-192h64v192zM957.44 531.84h1.344v-1.92l-1.344 1.92z"></path><path d="M994.56 474.88l-35.84 55.04-1.28 1.92-35.84 55.04-60.16-119.04 32 1.92C872.32 277.76 709.76 128 512 128 300.16 128 128 300.16 128 512s172.16 384 384 384c140.16 0 263.04-75.52 329.6-188.16h1.856l0.704 0.704 53.056 31.296A446.4 446.4 0 0 1 512 960c-247.68 0-448-200.32-448-448s200.32-448 448-448c234.88 0 426.88 179.84 446.08 408.96l36.48 1.92z"></path></svg></span></p>
+    <p><span id="detail-upload" style="width: 100%;"><svg viewBox="0 0 1024 1024"><path d="M518.3 459c-3.2-4.1-9.4-4.1-12.6 0l-112 141.7c-4.1 5.2-0.4 12.9 6.3 12.9h73.9V856c0 4.4 3.6 8 8 8h60c4.4 0 8-3.6 8-8V613.7H624c6.7 0 10.4-7.7 6.3-12.9L518.3 459z"></path><path d="M811.4 366.7C765.6 245.9 648.9 160 512.2 160S258.8 245.8 213 366.6C127.3 389.1 64 467.2 64 560c0 110.5 89.5 200 199.9 200H304c4.4 0 8-3.6 8-8v-60c0-4.4-3.6-8-8-8h-40.1c-33.7 0-65.4-13.4-89-37.7-23.5-24.2-36-56.8-34.9-90.6 0.9-26.4 9.9-51.2 26.2-72.1 16.7-21.3 40.1-36.8 66.1-43.7l37.9-9.9 13.9-36.6c8.6-22.8 20.6-44.1 35.7-63.4 14.9-19.2 32.6-35.9 52.4-49.9 41.1-28.9 89.5-44.2 140-44.2s98.9 15.3 140 44.2c19.9 14 37.5 30.8 52.4 49.9 15.1 19.3 27.1 40.7 35.7 63.4l13.8 36.5 37.8 10C846.1 454.5 884 503.8 884 560c0 33.1-12.9 64.3-36.3 87.7-23.4 23.4-54.5 36.3-87.6 36.3H720c-4.4 0-8 3.6-8 8v60c0 4.4 3.6 8 8 8h40.1C870.5 760 960 670.5 960 560c0-92.7-63.1-170.7-148.6-193.3z"></path></svg>上传</span></p>
+</div>
+
+<style scoped>
+  #root {
+    width: 100%;
+    height: 100%;
+  }
+
+  #main-cont {
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAGUlEQVQYV2M4gwH+YwCGIasIUwhT25BVBADtzYNYrHvv4gAAAABJRU5ErkJggg==");
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    cursor: move;
+  }
+  #main {
+    margin: auto;
+    position: absolute;
+    user-select: none;
+  }
+
+  #detail {
+    position: absolute;
+    right: 30px;
+    bottom: 30px;
+    width: 250px;
+    height: 280px;
+    padding: 20px;
+    background-color: #000a;
+    box-shadow: 0 0 3px #000;
+    border-radius: 5px;
+    display: none;
+    user-select: none;
+  }
+  #detail.show {
+    display: flex;
+    flex-direction: column;
+  }
+  #detail > p {
+    margin: 0;
+    height: 40px;
+    padding: 5px;
+    line-height: 30px;
+    color: #fff;
+    display: flex;
+  }
+  
+  #detail > p > input {
+    outline: none;
+    border: none;
+    padding: 0 5px;
+    background-color: #00f3;
+    box-shadow: 3px 3px 3px #997;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    color: #ddd;
+    border-radius: 5px;
+    width: 120px;
+    margin: 0 5px;
+  }
+  #detail > p > input::selection {
+    background-color: #888;
+  }
+  #detail > p > span {
+    height: 30px;
+    border-radius: 5px;
+    background-color: #00f3;
+    margin: 0 5px;
+    box-shadow: 3px 3px 3px #997;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    padding: 0 5px;
+  }
+  #detail > p > span:hover, #detail > p > input:hover {
+    background-color: #0088;
+    box-shadow: 1px 1px 2px #bb6;
+  }
+  #detail > p > span:active, #detail > p > input:focus {
+    background-color: #0082;
+    box-shadow: 0 0 8px #ff0;
+  }
+  #detail > p > span > svg {
+    width: 30px;
+    height: 30px;
+    fill: #fff;
+  }
+
+  #change > div {
+    position: absolute;
+    top: 0;
+    width: 100px;
+    height: 100%;
+    transition: background-color 0.2s;
+  }
+  #change > div:hover {
+    background-color: #0005;
+  }
+  #change > div:active {
+    background-color: #000a;
+  }
+  #change-prev {
+    left: 0;
+  }
+  #change-next {
+    right: 0;
+  }
+</style>
+<script>
+
+  $("root").oncontextmenu = function fc() {
+
+    $("detail").classList.add("show");
+    $("root").oncontextmenu = ()=> {
+
+      $("detail").classList.remove("show");
+      $("root").oncontextmenu = fc;
+
+    };
+
+  };
+
+  // 图片拖动移动
+  $("main-cont").onmousedown = (e)=> {
+
+    var oris = [parseInt($("main").style.left)||0, (parseInt($("main").style.top)||0)]
+    function mm(_e) {
+
+      $("main").style.left = oris[0] + _e.clientX - e.clientX + "px";
+      $("main").style.top = oris[1] + _e.clientY - e.clientY + "px";
+
+    }
+    function mu() {
+
+      document.removeEventListener("mousemove", mm);
+      document.removeEventListener("mouseup", mu);
+
+    }
+    document.addEventListener("mousemove", mm);
+    document.addEventListener("mouseup", mu);
+    
+  };
+
+  $("main").onselectstart = (e)=> {
+
+    e.preventDefault();
+    return false;
+
+  };
+
+  // 图片滚轮缩放和旋转
+  var imgRotate = 0;
+  var imgScale = 1;
+  $("main-cont").onwheel = (e)=> {
+
+    imgScale += (e.deltaY > 0)? -0.1 : 0.1;
+    if(imgScale < 0.1) imgScale = 0.1;
+    $("detail-scale").value = imgScale;
+    $("main").style.transform = "scale("+imgScale+") rotate("+imgRotate+"deg)";
+    
+  };
+  $("detail-scale").onchange = ()=> {
+
+    var ns = parseFloat($("detail-scale").value);
+    if(!ns) $("detail-scale").value = imgScale;
+    else {
+
+      imgScale = $("detail-scale").value = ns;
+      $("main").style.transform = "scale("+imgScale+") rotate("+imgRotate+"deg)";
+
+    }
+
+  };
+
+  $("detail-rotate-l").onclick = ()=> {
+
+    imgRotate -= 90;
+    $("main").style.transform = "scale("+imgScale+") rotate("+imgRotate+"deg)";
+
+  };
+  $("detail-rotate-r").onclick = ()=> {
+
+    imgRotate += 90;
+    $("main").style.transform = "scale("+imgScale+") rotate("+imgRotate+"deg)";
+    
+  };
+  
+  function resetPic() {
+
+    $("main").style.left = "0px";
+    $("main").style.top = "0px";
+
+    imgScale = 1;
+    $("main").style.transform = "scale(1)";
+    $("detail-scale").value = "1";
+
+  }
+  $("main-cont").ondblclick = resetPic;
+  $("detail-scale-reset").onclick = resetPic;
+  
+  $("detail-path-copy").onclick = ()=> {
+
+    $("detail-path").select();
+    document.execCommand('copy');
+
+  };
+
+
+  // 放置图片
+  function view(srcObj) {
+
+    if(!srcObj) return Win.createRaw("无法打开图片");
+
+    var p = srcObj.p;
+    var pa = p.split("/");
+    $("main").src = resPath(p);
+    resetPic();
+
+    $("detail-name").value = pa[pa.length - 1];
+    $("detail-path").value = p;
+    $("main").onload = ()=> {
+      
+      $("detail-resolution").textContent = $("main").naturalWidth + "x" + $("main").naturalHeight;
+
+    };
+    $("detail-size").textContent = srcObj.s;
+    $("detail-upload").onclick = ()=> window.open(resPath(p), "_blank");
+
+  }
+
+  // 解析打开参数
+  var p = app.param;
+  var typeList = ["ico", "png", "jpg", "webp", "gif"];
+
+  if(typeof p==="string") {
+
+    var pa = p.split("/");
+    var nsp = pa.slice(0, pa.length - 1).join("/")+"/";
+    req(resPath(nsp, true), (r)=> {
+
+      if(!r||!r.length) return false;
+      var picList = [];
+      var picIndex = 0;
+      for(let i = 0; i < r.length; ++i) {
+
+        const n = r[i].name;
+        for(let j = 0; j < typeList.length; ++j) {
+          
+          const srcObj = { 
+            "p": nsp+n,
+            "s": r[i].size
+          };
+          if(n.endsWith(typeList[j])) picList.push(srcObj);
+
+        }
+
+      }
+
+      picIndex = picList.findIndex((v)=> v.p===p);
+      view(picList[picIndex]);
+
+      $("change-prev").onclick = ()=> {
+
+        if(--picIndex < 0) picIndex = picList.length - 1;
+        view(picList[picIndex]);
+
+      };
+      $("change-next").onclick = ()=> {
+
+        if(++picIndex > (picList.length - 1)) picIndex = 0;
+        view(picList[picIndex]);
+
+      };
+
+    }, "json");
+
+  }else {
+
+    view({"p": "%app%/test.jpg", "s": 233});
+
+  }
+
+</script>
